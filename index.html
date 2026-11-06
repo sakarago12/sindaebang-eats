@@ -1,0 +1,258 @@
+<title>신대방역 1km 맛집</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: station-sign header, sticky walking-radius map on the left, filterable card list on the right; stacks on phones */
+:root{
+  --bg:#f6f8f6; --surface:#ffffff; --fg:#17201b; --muted:#5c6b62; --line:#dde5df;
+  --l2:#00a84d; --l2-ink:#ffffff; --l2-soft:#e3f4ea; --star:#e8a317; --ring:#b9cbbf;
+  --display:"Do Hyeon","IBM Plex Sans KR",system-ui,sans-serif;
+  --body:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111613; --surface:#18201b; --fg:#e6ede8; --muted:#97a69c; --line:#2a352e;
+  --l2:#3cc477; --l2-ink:#0b1a11; --l2-soft:#1c3326; --star:#f2bb45; --ring:#36473c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#18201b; --fg:#e6ede8; --muted:#97a69c; --line:#2a352e;
+  --l2:#3cc477; --l2-ink:#0b1a11; --l2-soft:#1c3326; --star:#f2bb45; --ring:#36473c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px}
+.sign{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 18px 6px 6px}
+.sign .no{width:44px;height:44px;border-radius:50%;background:var(--l2);color:var(--l2-ink);display:grid;place-items:center;font-family:var(--mono);font-size:15px}
+.sign .nm{font-family:var(--display);font-size:26px;line-height:1}
+.sign .en{font-size:12px;color:var(--muted);letter-spacing:.04em}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,4vw,36px);margin:0;line-height:1.15;text-wrap:balance}
+.lede{color:var(--muted);margin:0;max-width:62ch}
+.grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:flex;flex-direction:column;gap:12px}
+@media (max-width:860px){.side{position:static}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.map svg{width:100%;height:auto;display:block}
+.map .cap{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+.dot{fill:var(--l2);fill-opacity:.55;stroke:var(--surface);stroke-width:1.2;cursor:pointer;transition:r .15s}
+.dot.off{fill:var(--muted);fill-opacity:.18}
+.dot.hi{fill-opacity:1;stroke:var(--fg);stroke-width:2}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+.note a{color:inherit}
+.controls{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input[type=search],select{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+input[type=search]{flex:1 1 220px;min-width:0}
+.chip{font:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--l2);border-color:var(--l2);color:var(--l2-ink)}
+.chip:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,.card:focus-visible{outline:2px solid var(--l2);outline-offset:2px}
+.lbl{font-size:12px;color:var(--muted);letter-spacing:.05em;min-width:3.5em}
+.count{font-size:13px;color:var(--muted)}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0;transition:border-color .15s}
+.card.hi{border-color:var(--l2)}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.name{font-weight:700;font-size:16.5px;line-height:1.3;margin:0}
+.name small{font-weight:400;color:var(--muted);font-size:13px}
+.menu{font-size:13px;color:var(--muted)}
+.dist{flex:none;text-align:right;font-family:var(--mono);font-size:12.5px;line-height:1.3;font-variant-numeric:tabular-nums}
+.dist b{display:block;font-size:15px;color:var(--l2)}
+.rates{display:flex;flex-direction:column;gap:4px}
+.rate{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.src{font-size:11.5px;color:var(--muted);width:4.6em;flex:none}
+.rate.none .rc{font-style:normal}
+.stars{position:relative;display:inline-block;font-size:15px;letter-spacing:1px;color:var(--line);line-height:1}
+.stars span{position:absolute;inset:0 auto 0 0;overflow:hidden;color:var(--star);white-space:nowrap}
+.rate .num{font-weight:700}
+.rate .rc{font-size:12.5px;color:var(--muted)}
+.dc{margin-left:auto;font-family:var(--mono);font-size:11.5px;background:var(--l2-soft);color:var(--fg);border-radius:6px;padding:2px 7px}
+.sum{margin:0;font-size:14px}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:11.5px;border:1px solid var(--line);border-radius:6px;padding:1px 7px;color:var(--muted)}
+.links{display:flex;gap:12px;font-size:13px;margin-top:auto;padding-top:4px;border-top:1px dashed var(--line)}
+.links a{color:var(--l2);text-decoration:none;font-weight:500}
+.links a:hover{text-decoration:underline}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="sign" aria-label="2호선 신대방역 231">
+      <div class="no">231</div>
+      <div><div class="nm">신대방</div><div class="en">Sindaebang · Line 2</div></div>
+    </div>
+    <div style="flex:1 1 320px;min-width:0">
+      <h1>신대방역에서 걸어가는 맛집</h1>
+      <p class="lede">역 반경 약 1km 안의 식당을 다이닝코드와 구글 지도 별점, 후기로 정리했습니다. 난곡사거리, 보라매공원 쪽, 대림삼거리까지 포함돼요.</p>
+    </div>
+  </header>
+
+  <div class="grid">
+    <aside class="side">
+      <div class="panel map">
+        <svg id="map" viewBox="0 0 360 360" role="img" aria-label="신대방역 중심 반경 지도"></svg>
+        <div class="cap"><span>원: 300m · 500m · 1km (직선거리)</span><span>↑ 북</span></div>
+      </div>
+      <p class="note">별점·리뷰 수: <a href="https://www.diningcode.com/rank/%EC%8B%A0%EB%8C%80%EB%B0%A9%EC%97%AD" target="_blank" rel="noopener">다이닝코드</a>와 구글 지도 사용자 평가, 2026년 11월 6일 기준. 구글 별점은 위치가 일치하는 가게만 넣었고, 찾지 못한 10곳은 ‘구글 정보 없음’으로 표시했습니다. 후기 요약은 해당 리뷰를 짧게 정리한 것입니다. 리뷰 수가 적은 곳은 별점 편차가 크니 네이버·카카오 지도 후기도 함께 보세요. 도보 시간은 직선거리 ×1.3, 분당 70m로 어림했습니다.</p>
+    </aside>
+
+    <main class="controls">
+      <div class="panel controls">
+        <div class="row"><input id="q" type="search" placeholder="가게 이름이나 메뉴 검색 (예: 순대국, 돈까스)" aria-label="검색">
+          <select id="sort" aria-label="정렬">
+            <option value="dc">다이닝코드 점수순</option>
+            <option value="star">다이닝코드 별점순</option>
+            <option value="gstar">구글 별점순 (리뷰 20개+)</option>
+            <option value="grc">구글 리뷰 많은순</option>
+            <option value="rc">다이닝코드 리뷰 많은순</option>
+            <option value="near">가까운순</option>
+          </select></div>
+        <div class="row" id="cats"><span class="lbl">종류</span></div>
+        <div class="row" id="radius"><span class="lbl">거리</span></div>
+        <div class="row"><span class="lbl">별점</span><button class="chip" id="hi45" aria-pressed="false">4.5 이상만</button><span class="count" id="count"></span></div>
+      </div>
+      <div class="list" id="list"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+const ST=[37.48746,126.91316];
+// [id, 이름, 지점, 종류, 메뉴, lat, lng, 다이닝코드점수, 별점, 리뷰수, 주소, 요약, 태그]
+const D=[
+["9c7JEaWdMjmY","서라당","","카페·빵","치즈케이크, 스콘",37.48818,126.91548,86,4.8,15,"관악구 신사로 120-1","빵이 맛있다는 평이 압도적. 인기가 많아 자리가 금방 차고, 늦게 가면 품절이 많다고 해요.","디저트,포장"],
+["k0kmXJ1G3ypw","경식이네알쌈쭈꾸미","본점","해산물","알쌈쭈꾸미, 쭈꾸미볶음",37.48307,126.91414,79,4.8,12,"관악구 난곡로 325","통통한 쭈꾸미를 깻잎·날치알과 싸 먹는 집. 적당히 매콤하고, 마무리 치즈볶음밥 추천이 많아요.","식사모임,셀프바"],
+["L775ZMsJxjNr","등나무집","","국물·탕","꼬리곰탕, 소꼬리찜, 설렁탕",37.48817,126.90784,78,4.6,25,"동작구 대림로 52","소꼬리찜으로 이름난 40년 넘은 곰탕집. 맛은 확실하지만 가격대가 높다는 후기가 많습니다.","무료주차,노포,식신로드"],
+["CJVzUR3yinvm","사생활","","양식·브런치","파스타, 브런치",37.48780,126.91653,77,4.6,18,"관악구 신사로14길 19 지하1층","분위기 좋은 지하 파스타집. 모임, 소개팅, 주말 데이트 장소로 자주 언급돼요.","데이트,브레이크타임"],
+["GxYzTsG2ucCd","물찬조개","","해산물","조개찜, 조개구이",37.48382,126.90753,75,4.4,10,"관악구 조원로 43","소자도 양이 넉넉하고 조개 종류가 다양하며 비린 맛이 없다는 평. 가리비·전복 호평.","술모임,셀프바"],
+["XUwHI5GRmbpF","온정돈까스","","일식·돈까스","대왕돈까스, 매운 디진다돈까스",37.48273,126.91818,74,3.8,34,"관악구 남부순환로 1509","방송·유튜브로 알려진 대왕·초매운 돈까스. 고기는 두툼한데 소스가 느끼하다는 의견도 있어요.","무료주차,혼밥"],
+["v0KMkG8cUfeG","더빈마켓","","카페·빵","소보로빵",37.48568,126.91797,73,4.6,4,"관악구 조원로 141","소보로가 대표 메뉴인 빵집 겸 카페. 빵 종류가 다양하고 왕마들렌도 추천받아요.","빵집"],
+["S8X1yi2wbu8t","낙지세상","신대방본점","해산물","낙지볶음, 낙지해물찜",37.48822,126.90716,73,4.4,9,"동작구 대림로 57","속 재료 꽉 찬 바삭한 해물파전과 낙지찜 양념이 맛있다는 후기.","무료주차,식사모임"],
+["7pvcLLXd8vpQ","더낙원양꼬치","","중식·아시안","양꼬치 무한리필",37.48464,126.91442,72,4.6,7,"관악구 남부순환로151길 78","양꼬치 무한리필. 대기 시 번호를 적고 기다리며, 2인 이상이면 사이드가 나와요. 주차는 골목에.","무한리필,웨이팅"],
+["UP8pHMI7rnmv","가마솥순대국밥","보라매공원점","국물·탕","순대국",37.49224,126.92339,72,4.6,5,"동작구 보라매로5길 35","매장이 넓고 혼밥석이 있어요. 건더기 많고 담백한 순대국, 배추김치는 매운 편.","혼밥"],
+["nRSiEU6ogwGP","라쿠라쿠","","일식·돈까스","라멘, 덮밥",37.48740,126.91166,71,4.6,5,"동작구 대림로 14","역 바로 앞 라멘·덮밥집. 또 오고 싶다는 후기가 많고 바 좌석이라 혼밥에 좋아요.","혼밥,브레이크타임"],
+["TdLzIyL7zte4","명가김치찌개","","한식","생고기 김치찌개, 계란말이",37.48543,126.91651,71,4.3,5,"관악구 조원로 127","김치찌개+계란말이 혼밥 세트가 든든. 채수를 써 국물이 깔끔하고 밑반찬도 정갈하다는 평.","혼밥,포장"],
+["QoaqYrwdpHGj","금제","","일식·돈까스","히레카츠, 등심카츠",37.48488,126.91341,71,4.3,7,"관악구 조원로 101","관악구 손꼽히는 돈카츠라는 평. 동네 후기에서는 등심을 추천해요.","조용한,브레이크타임"],
+["c6wNGEiNPHnh","카츠 오도","신대방본점","일식·돈까스","히레카츠, 안심",37.48248,126.91342,71,4.8,18,"관악구 조원로16가길 51","직원이 친절하다는 이야기가 많은 돈카츠집. 안심카츠 추천.","데이트"],
+["bPOFuvSkW7qx","양은이네","난곡사거리점","국물·탕","동태탕, 보쌈",37.48343,126.91392,70,4.5,3,"관악구 난곡로 329","보쌈+동태알탕 세트가 인기. 늘 붐비지만 양이 푸짐하다는 평.","무료주차,가족외식"],
+["xE4tdo0AmtJ8","NOSH","","양식·브런치","영국식 브런치",37.48523,126.91171,70,4.6,7,"관악구 조원로13길 64","관악구에서 보기 드문 영국식 브런치. 외국인 손님도 많아요.","무료주차,데이트"],
+["MfvwA3EtxHLH","털보네왕족발","","고기","족발, 매운족발, 쟁반국수",37.48272,126.91420,70,4.9,4,"관악구 난곡로 321","일반·매운 반반족발이 가능. 매운 족발이 계속 당기는 맛이라는 후기.","배달,예약가능"],
+["jW5Fo5lBWH5p","대홍훠궈샤브샤브","","중식·아시안","훠궈 무한리필",37.48478,126.91418,70,4.7,6,"관악구 조원로 106 2층","훠궈 무한리필. 홍탕은 꽤 맵지만 가성비 만족이라는 평.","무한리필,셀프바"],
+["ekcQssOSAhSo","궁중삼계탕","","국물·탕","삼계탕, 한방삼계탕",37.49123,126.92333,70,4.7,3,"동작구 보라매로5길 43","동네 사람들이 찾는 삼계탕집. 다른 곳보다 찹쌀밥이 넉넉하다는 평.","보양식"],
+["N51QFwOu0Imz","탐나종합어시장","난곡사거리점","해산물","도다리회, 제철회",37.48219,126.91514,70,4.2,6,"관악구 남부순환로 1481","밑반찬이 다양하게 나오는 횟집. 제철회 구성이 계절마다 바뀌어요.","술모임"],
+["veHLOzbzebKl","모두 순대국 감자탕","난곡점","국물·탕","순대국, 뼈해장국",37.48227,126.91367,70,4.6,8,"관악구 난곡로65길 9","자극적이지 않고 간이 잘 맞는 뼈해장국. 가격이 저렴하고 셀프바가 있어요.","혼밥,셀프바"],
+["BNjNpcIYtt8Q","성원우육면","","중식·아시안","우육면, 꿔바로우",37.48469,126.91367,69,4.3,7,"관악구 난곡로 343","중국 음식 좋아하면 추천한다는 집. 꿔바로우는 꼭 시키라는 후기.",""],
+["JNDaQz2UuyrS","심원","","중식·아시안","동파육, 마라탕",37.49019,126.90853,69,5.0,5,"동작구 신대방길 107","순한 편의 마라탕과 중식 요리. 매장이 깔끔하다는 평.",""],
+["to4GydBpYWfc","포메인","보라매점","중식·아시안","쌀국수, 해산물 볶음쌀국수",37.49172,126.92328,69,4.3,5,"동작구 보라매로5길 43","담백한 국물의 쌀국수. 예약 없이 가능하지만 주차는 어렵습니다.",""],
+["hgDkfI1Z4Ypi","강가네 돌솥밥추어탕","","국물·탕","돌솥밥 추어탕",37.48037,126.90857,69,4.9,4,"금천구 남부순환로 1420","갈아낸 추어탕에 돌솥밥이 같이 나와요. 가게 앞 주차 가능.","주차"],
+["vG6WI9cnicSA","한마음정육식당","신대방점","고기","돼지한마리, 소고기",37.48727,126.91404,68,4.6,5,"관악구 신사로 104-1","역에서 가장 가까운 정육식당. 계란찜·된장찌개가 서비스로 나오고 사장님이 친절하다는 평.","주차불가"],
+["pTR8Tibkb49t","가마솥순대국밥","대림삼거리점","국물·탕","순대국밥, 수육국밥",37.49093,126.90768,68,5.0,3,"영등포구 시흥대로 663","순대와 고기 양이 푸짐. 국산 깍두기가 맛있어 리필이 많다는 후기.","혼밥,셀프바"],
+["DPfMMPBXFevp","신의한국수","신대방점","한식","국수, 우동, 김밥",37.48489,126.91353,68,4.3,5,"관악구 조원로 103","음식이 빨리 나오는 국수 분식. 1시간 주차 가능, 반찬·물은 셀프.","혼밥,주차"],
+["ZRBDRTXAqS2i","신사동칼국수","","한식","칼국수, 보리밥",37.48558,126.91364,68,4.0,3,"관악구 난곡로 353-1","칼국수를 시키면 보리밥이 나와요. 김치 맛집이라는 평.","혼밥,브레이크타임"],
+["7cLETcjtgAYl","서가장인곱창","신림점","고기","한우곱창 모듬구이",37.48226,126.91433,68,4.3,3,"관악구 난곡로 317","잡내 없이 고소한 모듬구이. 마무리 볶음밥은 필수라는 후기.","술모임"],
+["Rw9SNIZ9I8Hh","오정담","","고기","오리로스, 오리주물럭",37.48222,126.91537,68,4.8,2,"관악구 남부순환로 1483","근처에 드문 오리고기집. 로스·주물럭 반반 세트, 매장이 넓어 가족 외식에 좋아요.","가족외식"],
+["Zxhr4yvMt20C","골드식당","","고기","제주 돼지 삼겹살, 냉면",37.48677,126.91482,67,4.2,10,"관악구 신사로10길 20","무항생제 제주 돼지만 쓰는 고깃집. 서비스 찌개가 밥도둑이라는 평. 주택가라 조용해요.","무료주차,예약필수"],
+["CLHL4sKXFDAc","Hoang hon 베트남쌀국수","","중식·아시안","쌀국수, 분까이",37.48702,126.91075,67,5.0,3,"동작구 대림로 21-1","진한 육수에 양지·완자가 들어간 쌀국수. 매운 쌀국수는 해장용으로 추천.",""],
+["T1c453dwamXc","울엄마밥상","","한식","생선구이, 찌개, 불고기",37.48278,126.91641,67,5.0,3,"관악구 관천로11길 155","찌개와 생선구이 백반. 고등어구이가 크고 잘 구워 나온다는 후기.","혼밥,저렴"],
+["UssHgG4wWGBs","돈벼락삼겹살","","고기","삼겹살, 김치찌개",37.48449,126.91385,66,4.2,4,"관악구 난곡로 341","가격이 착한 삼겹살집. 찌개와 계란찜 서비스, 혼밥 손님도 많아요.","혼밥,셀프바"],
+["sQzfcQCrIUN5","강창구진순대","난곡사거리점","국물·탕","얼큰순대국",37.48291,126.91417,66,4.3,2,"관악구 난곡로 323","얼큰순대국에 순대와 고기가 넉넉하다는 평.","혼밥"],
+["zoCM0tzx0sV6","마당쇠숯불갈비","","고기","참숯 수제 돼지갈비",37.48090,126.91120,66,4.3,3,"관악구 남부순환로 1444","달지 않아 물리지 않는 돼지갈비. 3+1 행사 때 가성비가 좋아요.",""],
+["3b149FVUcAOz","행복한국수집","신림점","한식","잔치국수, 비빔국수",37.48372,126.92151,65,4.1,3,"관악구 남부순환로161길 10","5천원대에 푸짐한 국수. 같이 나오는 열무김치가 잘 어울린다는 평.","저렴"],
+["0VcJElK9h29e","토리우리","","술집","야끼토리, 꼬치",37.48770,126.91473,65,4.0,3,"관악구 신사로 112","1번 출구에서 3분 거리 꼬치집. 주차는 신대방역 공영주차장 이용.","혼술"],
+["Czxb58oNSJNd","등갈비육냉면","","고기","등갈비, 냉면, 주먹밥",37.49012,126.90877,65,4.5,4,"동작구 신대방길 108","등갈비에 냉면 조합. 가게 앞 주차는 어렵고 서광공영주차장을 권해요.",""],
+["jlW7EHEcJ0Dv","돼지사냥","","고기","오겹살, 생삼겹",37.48687,126.91478,65,4.6,3,"관악구 난곡로78길 20","오겹살에 된장찌개가 기본, 두부를 같이 구워줘요. 오픈 시간이 들쭉날쭉해 저녁 5시 이후 방문 권장.","술모임"],
+["CTuZ2toBmsMP","소품은돼지","난곡사거리점","고기","한돈 한판, 소고기",37.48214,126.91502,65,4.9,5,"관악구 남부순환로 1479","국산 돼지가 부드럽다는 평. 돼지 주문 시 껍데기 서비스.",""],
+["5r5zayoKTg0L","칼포니치킨","","술집","치킨, 떡볶이",37.48664,126.91301,64,4.5,4,"관악구 신사로 92","치킨+떡볶이 세트가 가성비 좋아요. 주문 후 바로 튀겨 나온다는 후기.","배달"],
+["0tVnHj3RBZGI","샤브향","신대방역점","중식·아시안","샤브샤브, 월남쌈",37.48251,126.91404,64,4.5,6,"관악구 난곡로65길 2","채소 많은 샤브샤브와 월남쌈. 건강하게 배부르게 먹었다는 평.","가족외식"],
+["yd5JhfltYEu4","속에천불 청송얼음막걸리","신대방점","술집","막걸리, 꼬막, 제육",37.48353,126.90765,64,4.5,2,"관악구 조원중앙로 50","얼음 막걸리와 푸짐한 안주. 제철 꼬막데침이 비리지 않다는 후기.","술모임"],
+["7IWppFBm77n3","88서울불백","신대방점","한식","불백",37.48725,126.91019,64,4.3,2,"동작구 대림로 28","기사식당 스타일 불백. 200g+공깃밥 1만원 선, 고기가 바삭쫀득.","혼밥,셀프코너"],
+["Cs1HEvUffHVR","집우","","술집","이자카야, 소고기 야끼니꾸",37.48553,126.91365,64,4.3,3,"관악구 난곡로 353-1","소고기 안주에 한잔하기 좋은 이자카야. 단골들이 아끼는 곳이라는 후기.","술모임"],
+["PekJyiWi5Jqd","종로곱창","","고기","치즈곱창볶음",37.48277,126.91174,64,4.5,4,"관악구 남부순환로145길 29","치즈 가득 곱창볶음, 곱창·순대 양이 많아 김에 싸 먹는 걸 추천.","술모임"],
+["KcvClO6JONsw","마산아구해물복","","해산물","아구찜, 해물 섞어찜",37.48247,126.91482,64,4.8,4,"관악구 난곡로66길 6","낙지·전복 등 해물이 실한 섞어찜. 간이 딱 맞다는 평.","가족외식"],
+["Q4s1hzIZojbO","시골주먹고기","","고기","제주 주먹고기",37.48158,126.91101,64,5.0,2,"관악구 남부순환로143길 6","두툼한 제주 돼지 주먹고기. 원래도 저렴하고 현금 결제 시 더 싸요.","가성비"],
+["RihbPv5AlMLb","만끽","","술집","아롱사태 수육냉채",37.48301,126.91496,63,4.7,5,"관악구 난곡로66가길 8","아롱사태 수육 냉채가 대표. 기본 안주와 분위기, 사장님 친절이 호평.","술모임"],
+["KezKOdU5yhpu","서우얼큰칼국수","","한식","바지락칼국수, 얼큰칼국수",37.48292,126.91644,63,4.8,8,"관악구 관천로11길 154","바지락이 넉넉히 들어간 칼국수. 2인분이면 성인 둘이 배부르다는 후기.","혼밥"],
+["9qjEjAiK2h7N","틱택커피","","카페·빵","크림커피",37.48738,126.91148,72,4.4,10,"동작구 대림로 16","컬러풀하고 귀여운 인테리어의 카페. 크림커피가 대표.","혼카페"],
+["93A0Y1iNqKhP","인투커피","","카페·빵","카페라떼, 케이크",37.48364,126.91400,72,4.6,11,"관악구 난곡로 331","커피 맛으로 평가받는 카페. 매장이 깔끔하고 반려견 동반 가능.","반려동물동반"],
+["GDZ4NKxo48Uo","까페달달스콘","","카페·빵","스콘, 브런치",37.48550,126.91660,73,4.7,9,"관악구 조원로 129","조용한 감성 카페. 스콘과 브런치, 커피 모두 재방문 의사가 높아요.","테라스"],
+["vGXjtayYqnHZ","메이지커피","","카페·빵","핸드드립, 바나나푸딩",37.48646,126.91346,70,4.3,7,"관악구 난곡로 363-1 2층","핸드드립 커피를 찾아오는 카페. 루프탑이 있고 카공하기 좋다는 평.","루프탑"],
+["MMumdu7dhGfi","커피니쉬","","카페·빵","에그타르트",37.48629,126.91250,67,4.8,7,"관악구 신사로 86","카공하기 좋은 테이블과 의자, 조용한 분위기. 사장님이 친절해요.","혼카페"]
+];
+const toRad=x=>x*Math.PI/180;
+function dist(la,ln){const dl=toRad(la-ST[0]),dg=toRad(ln-ST[1]);const h=Math.sin(dl/2)**2+Math.cos(toRad(la))*Math.cos(toRad(ST[0]))*Math.sin(dg/2)**2;return Math.round(12742000*Math.asin(Math.sqrt(h)));}
+const R=D.map(r=>({id:r[0],n:r[1],b:r[2],cat:r[3],menu:r[4],lat:r[5],lng:r[6],dc:r[7],star:r[8],rc:r[9],addr:r[10],sum:r[11],tags:r[12]?r[12].split(','):[],d:dist(r[5],r[6])}));
+R.forEach(r=>r.walk=Math.max(1,Math.round(r.d*1.3/70)));
+// 구글 지도 별점, 리뷰 수 (2026-11-06 조회, 좌표가 일치한 가게만)
+const G={"9c7JEaWdMjmY":[4.8,27],"k0kmXJ1G3ypw":[4.2,496],"L775ZMsJxjNr":[4.1,1064],"CJVzUR3yinvm":[4.5,274],"GxYzTsG2ucCd":[4.4,173],"XUwHI5GRmbpF":[3.7,1135],"v0KMkG8cUfeG":[4.6,5],"S8X1yi2wbu8t":[4.0,224],"7pvcLLXd8vpQ":[4.0,4],"nRSiEU6ogwGP":[4.6,25],"TdLzIyL7zte4":[4.8,9],"QoaqYrwdpHGj":[4.4,21],"c6wNGEiNPHnh":[4.6,202],"bPOFuvSkW7qx":[4.3,3],"xE4tdo0AmtJ8":[4.8,149],"MfvwA3EtxHLH":[4.2,26],"jW5Fo5lBWH5p":[4.6,41],"ekcQssOSAhSo":[4.1,238],"N51QFwOu0Imz":[4.1,350],"BNjNpcIYtt8Q":[4.1,42],"JNDaQz2UuyrS":[4.4,5],"to4GydBpYWfc":[4.1,96],"hgDkfI1Z4Ypi":[4.2,286],"vG6WI9cnicSA":[4.5,12],"DPfMMPBXFevp":[4.7,3],"Rw9SNIZ9I8Hh":[4.5,4],"Zxhr4yvMt20C":[4.6,22],"CLHL4sKXFDAc":[5.0,1],"T1c453dwamXc":[5.0,1],"UssHgG4wWGBs":[4.1,58],"zoCM0tzx0sV6":[4.0,119],"3b149FVUcAOz":[4.6,80],"jlW7EHEcJ0Dv":[5.0,2],"5r5zayoKTg0L":[4.4,28],"0tVnHj3RBZGI":[4.5,2],"yd5JhfltYEu4":[4.4,23],"7IWppFBm77n3":[4.1,79],"Cs1HEvUffHVR":[4.3,7],"PekJyiWi5Jqd":[4.1,26],"KcvClO6JONsw":[5.0,1],"Q4s1hzIZojbO":[3.7,3],"RihbPv5AlMLb":[4.8,19],"KezKOdU5yhpu":[4.2,81],"9qjEjAiK2h7N":[4.5,10],"93A0Y1iNqKhP":[4.5,66],"GDZ4NKxo48Uo":[3.3,3],"vGXjtayYqnHZ":[4.5,102]};
+R.forEach(r=>{const g=G[r.id];r.gs=g?g[0]:null;r.gc=g?g[1]:0;});
+const starBar=v=>`<span class="stars" aria-hidden="true">★★★★★<span style="width:${v/5*100}%">★★★★★</span></span>`;
+const CATS=["전체","한식","국물·탕","고기","해산물","일식·돈까스","중식·아시안","양식·브런치","술집","카페·빵"];
+const RAD=[[300,"300m"],[500,"500m"],[1100,"1km"]];
+const st={cat:"전체",rad:1100,hi:false,q:"",sort:"dc"};
+try{const s=JSON.parse(localStorage.getItem("sdb-eats")||"{}");Object.assign(st,s);}catch(e){}
+function save(){try{localStorage.setItem("sdb-eats",JSON.stringify({cat:st.cat,rad:st.rad,hi:st.hi,sort:st.sort}));}catch(e){}}
+const $=s=>document.querySelector(s);
+function chips(){
+  const c=$("#cats");CATS.forEach(k=>{const b=document.createElement("button");b.className="chip";b.textContent=k;b.dataset.k=k;b.onclick=()=>{st.cat=k;render()};c.appendChild(b);});
+  const r=$("#radius");RAD.forEach(([v,l])=>{const b=document.createElement("button");b.className="chip";b.textContent=l+" 이내";b.dataset.v=v;b.onclick=()=>{st.rad=v;render()};r.appendChild(b);});
+  $("#hi45").onclick=()=>{st.hi=!st.hi;render()};
+  $("#q").oninput=e=>{st.q=e.target.value.trim();render()};
+  $("#sort").value=st.sort;$("#sort").onchange=e=>{st.sort=e.target.value;render()};
+}
+// map
+const SC=160/1000, C=180;
+function xy(r){return[C+(r.lng-ST[1])*88200*SC, C-(r.lat-ST[0])*111000*SC];}
+function drawMap(){
+  const ns="http://www.w3.org/2000/svg",svg=$("#map");let h="";
+  [[1000,"1km"],[500,"500m"],[300,"300m"]].forEach(([m,l])=>{h+=`<circle cx="${C}" cy="${C}" r="${m*SC}" fill="none" stroke="var(--ring)" stroke-dasharray="${m===1000?'0':'4 4'}"/><text x="${C+m*SC*0.707+4}" y="${C-m*SC*0.707-4}" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${l}</text>`;});
+  // line 2 track roughly east-west through the station (신림 ↔ 구로디지털단지)
+  h+=`<polyline points="4,${C+32} ${C},${C} 356,${C+28}" fill="none" stroke="var(--l2)" stroke-width="5" stroke-opacity=".35" stroke-linecap="round" stroke-linejoin="round"/>`;
+  h+=`<text x="8" y="${C+50}" font-size="11" fill="var(--muted)">← 구로디지털단지</text><text x="352" y="${C+46}" font-size="11" fill="var(--muted)" text-anchor="end">신림 →</text>`;
+  h+=`<text x="${C+120}" y="40" font-size="11" fill="var(--muted)" text-anchor="middle">보라매공원 ↗</text><text x="${C}" y="352" font-size="11" fill="var(--muted)" text-anchor="middle">↓ 난곡사거리</text>`;
+  R.forEach(r=>{const[x,y]=xy(r);h+=`<circle class="dot" data-id="${r.id}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5"><title>${r.n} · ${r.d}m</title></circle>`;});
+  h+=`<circle cx="${C}" cy="${C}" r="11" fill="var(--l2)" stroke="var(--surface)" stroke-width="3"/><text x="${C}" y="${C+4}" font-size="10" fill="var(--l2-ink)" text-anchor="middle" font-family="IBM Plex Mono,monospace">231</text>`;
+  svg.innerHTML=h;
+  svg.querySelectorAll(".dot").forEach(d=>{
+    d.addEventListener("mouseenter",()=>hi(d.dataset.id,true));
+    d.addEventListener("mouseleave",()=>hi(d.dataset.id,false));
+    d.addEventListener("click",()=>{const c=document.getElementById("c-"+d.dataset.id);if(c){c.scrollIntoView({behavior:"smooth",block:"center"});c.focus({preventScroll:true});}});
+  });
+}
+function hi(id,on){const c=document.getElementById("c-"+id);if(c)c.classList.toggle("hi",on);const d=document.querySelector(`.dot[data-id="${id}"]`);if(d){d.classList.toggle("hi",on);d.setAttribute("r",on?8:5);}}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function card(r){
+  const full=r.n+(r.b?" "+r.b:""), qn=encodeURIComponent(full+(r.b?"":" 신대방"));
+  return `<article class="card" id="c-${r.id}" tabindex="-1" data-id="${r.id}">
+  <div class="top"><div style="min-width:0"><h3 class="name">${esc(r.n)} ${r.b?`<small>${esc(r.b)}</small>`:""}</h3><div class="menu">${esc(r.cat)} · ${esc(r.menu)}</div></div>
+  <div class="dist"><b>${r.d}m</b>도보 ${r.walk}분</div></div>
+  <div class="rates">
+  <div class="rate"><span class="src">다이닝코드</span>${starBar(r.star)}<span class="num">${r.star.toFixed(1)}</span><span class="rc">리뷰 ${r.rc}개</span><span class="dc" title="다이닝코드 자체 점수">DC ${r.dc}</span></div>
+  ${r.gs!=null?`<div class="rate"><span class="src">구글</span>${starBar(r.gs)}<span class="num">${r.gs.toFixed(1)}</span><span class="rc">리뷰 ${r.gc.toLocaleString()}개</span></div>`:`<div class="rate none"><span class="src">구글</span><span class="rc">구글 정보 없음</span></div>`}
+  </div>
+  <p class="sum">${esc(r.sum)}</p>
+  ${r.tags.length?`<div class="tags">${r.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:""}
+  <div class="menu">${esc(r.addr)}</div>
+  <div class="links"><a href="https://www.diningcode.com/profile.php?rid=${r.id}" target="_blank" rel="noopener">후기 전체</a><a href="https://map.naver.com/p/search/${qn}" target="_blank" rel="noopener">네이버 지도</a><a href="https://map.kakao.com/?q=${qn}" target="_blank" rel="noopener">카카오맵</a></div>
+  </article>`;
+}
+function render(){
+  document.querySelectorAll("#cats .chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===st.cat));
+  document.querySelectorAll("#radius .chip").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===st.rad));
+  $("#hi45").setAttribute("aria-pressed",st.hi);
+  const q=st.q.toLowerCase();
+  const f=R.filter(r=>(st.cat==="전체"||r.cat===st.cat)&&r.d<=st.rad&&(!st.hi||r.star>=4.5)&&(!q||(r.n+r.b+r.menu+r.cat+r.sum+r.tags.join()).toLowerCase().includes(q)));
+  const k={dc:(a,b)=>b.dc-a.dc||b.star-a.star,star:(a,b)=>b.star-a.star||b.rc-a.rc,rc:(a,b)=>b.rc-a.rc,near:(a,b)=>a.d-b.d,
+    gstar:(a,b)=>((b.gc>=20)-(a.gc>=20))||((b.gs||0)-(a.gs||0))||b.gc-a.gc,
+    grc:(a,b)=>b.gc-a.gc}[st.sort]||((a,b)=>b.dc-a.dc);
+  f.sort(k);
+  $("#list").innerHTML=f.length?f.map(card).join(""):`<div class="empty">조건에 맞는 가게가 없어요. 거리를 넓히거나 종류를 ‘전체’로 바꿔 보세요.</div>`;
+  $("#count").textContent=`${f.length}곳 / 전체 ${R.length}곳`;
+  const ids=new Set(f.map(r=>r.id));
+  document.querySelectorAll(".dot").forEach(d=>d.classList.toggle("off",!ids.has(d.dataset.id)));
+  document.querySelectorAll(".card").forEach(c=>{c.onmouseenter=()=>hi(c.dataset.id,true);c.onmouseleave=()=>hi(c.dataset.id,false);});
+  save();
+}
+chips();drawMap();render();
+</script>
