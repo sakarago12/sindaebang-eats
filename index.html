@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>신대방역 1km 맛집</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -74,8 +76,54 @@ input[type=search]{flex:1 1 220px;min-width:0}
 .links a{color:var(--l2);text-decoration:none;font-weight:500}
 .links a:hover{text-decoration:underline}
 .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0}
+/* 보기 전환 스위치 */
+.viewsw{display:inline-flex;margin-left:auto;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex:none}
+.viewsw button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--muted);border-radius:999px;padding:6px 14px;cursor:pointer;min-height:34px}
+.viewsw button[aria-pressed="true"]{background:var(--l2);color:var(--l2-ink);font-weight:500}
+.viewsw button:focus-visible,.maptg:focus-visible,.totop:focus-visible{outline:2px solid var(--l2);outline-offset:2px}
+.maptg,#mapSlotM,.totop{display:none}
+/* ===== 모바일 보기 ===== */
+[data-view="m"] body{font-size:15px;padding-block:12px 88px}
+[data-view="m"] .wrap{max-width:480px;gap:12px}
+[data-view="m"] header{gap:10px;align-items:center}
+[data-view="m"] .sign{padding:4px 12px 4px 4px;gap:8px}
+[data-view="m"] .sign .no{width:34px;height:34px;font-size:12px}
+[data-view="m"] .sign .nm{font-size:20px}
+[data-view="m"] .sign .en{display:none}
+[data-view="m"] .head-text{order:3;flex:1 1 100%!important}
+[data-view="m"] h1{font-size:23px}
+[data-view="m"] .lede{font-size:13px}
+[data-view="m"] .grid{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+[data-view="m"] .grid>*{min-width:0}
+[data-view="m"] .side{position:static;order:2}
+[data-view="m"] .panel.controls{padding:12px;gap:10px}
+[data-view="m"] .lbl{display:none}
+[data-view="m"] #cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-12px;padding-inline:12px;-webkit-overflow-scrolling:touch}
+[data-view="m"] #cats::-webkit-scrollbar{display:none}
+[data-view="m"] #cats .chip{flex:none}
+[data-view="m"] .chip{padding:7px 13px;min-height:36px}
+[data-view="m"] input[type=search]{flex:1 1 0;padding:10px 12px;font-size:16px}
+[data-view="m"] select{flex:1 1 100%;font-size:14px;padding:9px 10px}
+[data-view="m"] .maptg{display:inline-flex;align-items:center;gap:6px;flex:none;font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;padding:0 12px;min-height:44px;cursor:pointer}
+[data-view="m"] .maptg[aria-expanded="true"]{background:var(--l2-soft);border-color:var(--l2)}
+[data-view="m"] #mapSlotM:not(:empty){display:block}
+[data-view="m"] .count{margin-left:auto}
+[data-view="m"] .list{grid-template-columns:minmax(0,1fr);gap:10px}
+[data-view="m"] .card{padding:12px 14px;gap:7px;border-radius:12px}
+[data-view="m"] .name{font-size:16.5px}
+[data-view="m"] .sum{font-size:14px;line-height:1.5}
+[data-view="m"] .links{gap:6px;border-top:0;padding-top:2px}
+[data-view="m"] .links a{flex:1 1 0;text-align:center;font-size:13px;border:1px solid var(--line);border-radius:9px;padding:9px 4px;min-height:40px}
+[data-view="m"] .links a:hover{text-decoration:none}
+[data-view="m"] .totop{display:grid;place-items:center;position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:48px;height:48px;border-radius:50%;border:0;background:var(--l2);color:var(--l2-ink);font-size:20px;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer;z-index:5;transition:opacity .2s}
+[data-view="m"] .totop[hidden]{display:none!important}
+[data-view="m"] .side #mapPanel{display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<script>
+// 보기 방식: 저장된 선택이 없으면 모바일 보기로 시작
+(function(){var v="m";try{var s=localStorage.getItem("sdb-view");if(s==="m"||s==="pc")v=s;}catch(e){}document.documentElement.setAttribute("data-view",v);})();
+</script>
 
 <div class="wrap">
   <header>
@@ -83,15 +131,19 @@ input[type=search]{flex:1 1 220px;min-width:0}
       <div class="no">231</div>
       <div><div class="nm">신대방</div><div class="en">Sindaebang · Line 2</div></div>
     </div>
-    <div style="flex:1 1 320px;min-width:0">
+    <div class="head-text" style="flex:1 1 320px;min-width:0">
       <h1>신대방역에서 걸어가는 맛집</h1>
       <p class="lede">역 반경 약 1km 안의 식당을 다이닝코드와 구글 지도 별점, 후기로 정리했습니다. 난곡사거리, 보라매공원 쪽, 대림삼거리까지 포함돼요.</p>
+    </div>
+    <div class="viewsw" role="group" aria-label="보기 방식">
+      <button type="button" id="vM" data-v="m">모바일</button>
+      <button type="button" id="vPC" data-v="pc">PC</button>
     </div>
   </header>
 
   <div class="grid">
     <aside class="side">
-      <div class="panel map">
+      <div class="panel map" id="mapPanel">
         <svg id="map" viewBox="0 0 360 360" role="img" aria-label="신대방역 중심 반경 지도"></svg>
         <div class="cap"><span>원: 300m · 500m · 1km (직선거리)</span><span>↑ 북</span></div>
       </div>
@@ -101,6 +153,7 @@ input[type=search]{flex:1 1 220px;min-width:0}
     <main class="controls">
       <div class="panel controls">
         <div class="row"><input id="q" type="search" placeholder="가게 이름이나 메뉴 검색 (예: 순대국, 돈까스)" aria-label="검색">
+          <button type="button" class="maptg" id="maptg" aria-expanded="false" aria-controls="mapSlotM">지도</button>
           <select id="sort" aria-label="정렬">
             <option value="dc">다이닝코드 점수순</option>
             <option value="star">다이닝코드 별점순</option>
@@ -113,10 +166,12 @@ input[type=search]{flex:1 1 220px;min-width:0}
         <div class="row" id="radius"><span class="lbl">거리</span></div>
         <div class="row"><span class="lbl">별점</span><button class="chip" id="hi45" aria-pressed="false">4.5 이상만</button><span class="count" id="count"></span></div>
       </div>
+      <div id="mapSlotM"></div>
       <div class="list" id="list"></div>
     </main>
   </div>
 </div>
+<button type="button" class="totop" id="totop" aria-label="맨 위로" hidden>↑</button>
 
 <script>
 const ST=[37.48746,126.91316];
@@ -254,5 +309,25 @@ function render(){
   document.querySelectorAll(".card").forEach(c=>{c.onmouseenter=()=>hi(c.dataset.id,true);c.onmouseleave=()=>hi(c.dataset.id,false);});
   save();
 }
-chips();drawMap();render();
+// 보기 전환 (모바일 / PC)
+const mapPanel=$("#mapPanel"), side=document.querySelector(".side"), mapSlot=$("#mapSlotM"), mapTg=$("#maptg"), toTop=$("#totop");
+let mapOpen=false;
+const isM=()=>document.documentElement.getAttribute("data-view")==="m";
+function placeMap(){
+  if(isM()&&mapOpen){mapSlot.appendChild(mapPanel);}else if(mapPanel.parentNode!==side){side.prepend(mapPanel);}
+  mapTg.setAttribute("aria-expanded",String(mapOpen));
+  mapTg.textContent=mapOpen?"지도 닫기":"지도";
+}
+function setView(v){
+  document.documentElement.setAttribute("data-view",v);
+  document.querySelectorAll(".viewsw button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===v)));
+  try{localStorage.setItem("sdb-view",v);}catch(e){}
+  placeMap();onScroll();
+}
+function onScroll(){toTop.hidden=!(isM()&&window.scrollY>500);}
+document.querySelectorAll(".viewsw button").forEach(b=>b.onclick=()=>setView(b.dataset.v));
+mapTg.onclick=()=>{mapOpen=!mapOpen;placeMap();};
+toTop.onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
+window.addEventListener("scroll",onScroll,{passive:true});
+chips();drawMap();render();setView(document.documentElement.getAttribute("data-view")||"m");
 </script>
